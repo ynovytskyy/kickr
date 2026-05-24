@@ -183,16 +183,69 @@ html, body {
   letter-spacing: 2px;
 }
 
-/* ---------- Portrait fallback (landscape is primary) ---------- */
+/* ---------- Portrait layout (landscape is primary, but portrait must work) ----------
+
+   In portrait the three regions become three rows instead of three columns:
+
+     [ beats (horizontal) ]
+     [ bar counter        ]
+     [ BPM (horizontal,   ]
+     [   scrollable)      ]
+*/
 
 @media (orientation: portrait) {
+  .app {
+    flex-direction: column;
+  }
+
+  .play-zone {
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  /* Beats become a horizontal row at the top of the play zone. */
+  .beats {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: clamp(64px, 12vh, 96px);
+    padding: 0 8px;
+  }
+
+  .beat { width: 36px; height: 36px; }
+  .beat--accent { width: 52px; height: 52px; }
+
+  /* Bar counter sized for portrait — taller than wide. */
   .bar-counter__current {
-    font-size: clamp(140px, 40vh, 320px);
+    font-size: clamp(160px, 45vh, 360px);
   }
   .bar-counter__total {
-    font-size: clamp(28px, 8vh, 64px);
+    font-size: clamp(32px, 8vh, 72px);
   }
-  .beats { width: 56px; }
-  .beat { width: 32px; height: 32px; }
-  .beat--accent { width: 44px; height: 44px; }
+
+  /* BPM becomes a horizontal row at the bottom, scrollable left/right. */
+  .bpm {
+    width: 100%;
+    height: clamp(72px, 12vh, 100px);
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px;
+  }
+
+  .bpm::-webkit-scrollbar {
+    width: auto;
+    height: 6px;
+  }
+
+  .bpm__pill {
+    flex: 0 0 auto;
+    width: clamp(80px, 22vw, 120px);
+    height: 100%;
+    min-height: 0;
+  }
 }
