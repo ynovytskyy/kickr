@@ -67,6 +67,40 @@
     osc.stop(time + duration + 0.02);
   }
 
+  // ---------- Wake Lock ----------
+  let wakeLock = null;
+
+  async function acquireWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        // The system released the lock (e.g. tab hidden). Clear our ref so
+        // visibilitychange knows to re-acquire if we're still playing.
+        wakeLock = null;
+      });
+    } catch (err) {
+      // Acquisition can fail (e.g. low battery). Not fatal.
+      wakeLock = null;
+    }
+  }
+
+  async function releaseWakeLock() {
+    if (!wakeLock) return;
+    try {
+      await wakeLock.release();
+    } catch (_) {
+      // ignore
+    }
+    wakeLock = null;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && state.isPlaying && !wakeLock) {
+      acquireWakeLock();
+    }
+  });
+
   // ---------- Scheduler ----------
   const LOOKAHEAD_MS = 25;
   const SCHEDULE_AHEAD_S = 0.1;
@@ -129,6 +163,7 @@
     const ctx = ensureAudioContext();
     if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume();
+    acquireWakeLock();
 
     state.isPlaying = true;
     state.currentBar = 1;
@@ -149,6 +184,7 @@
       clearInterval(schedulerInterval);
       schedulerInterval = null;
     }
+    releaseWakeLock();
     state.isPlaying = false;
     state.currentBar = 0;
     state.currentBeat = 0;
@@ -164,6 +200,7 @@
       clearInterval(schedulerInterval);
       schedulerInterval = null;
     }
+    releaseWakeLock();
     state.isPlaying = false;
     state.currentBeat = 0;
     // Leave state.currentBar at MAX_BARS for visual feedback. start() resets it.
