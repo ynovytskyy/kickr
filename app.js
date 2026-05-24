@@ -67,7 +67,119 @@
     osc.stop(time + duration + 0.02);
   }
 
-  // Expose for manual console verification during development.
-  // Removed in Task 4 once the scheduler drives playback.
-  window.__metronomeDebug = { ensureAudioContext, playBeep, getCtx: () => audioCtx };
+  // ---------- Scheduler ----------
+  const LOOKAHEAD_MS = 25;
+  const SCHEDULE_AHEAD_S = 0.1;
+
+  let nextNoteTime = 0;
+  let schedulerInterval = null;
+
+  function scheduler() {
+    if (!state.isPlaying) return;
+    while (nextNoteTime < audioCtx.currentTime + SCHEDULE_AHEAD_S) {
+      const beat = state.currentBeat; // 1..4
+      const bar = state.currentBar;   // 1..MAX_BARS
+      const isAccent = beat === 1;
+
+      playBeep(nextNoteTime, isAccent);
+
+      const lagMs = Math.max(0, (nextNoteTime - audioCtx.currentTime) * 1000);
+      setTimeout(() => renderBeat(beat, bar), lagMs);
+
+      const isLastBeat = bar === MAX_BARS && beat === BEATS_PER_BAR;
+      if (isLastBeat) {
+        // Let the queued audio play out, then auto-stop. Keep the bar at MAX_BARS.
+        const audioTailMs = 150;
+        setTimeout(() => autoStop(), lagMs + audioTailMs);
+        clearInterval(schedulerInterval);
+        schedulerInterval = null;
+        return;
+      }
+
+      nextNoteTime += 60.0 / state.bpm;
+      state.currentBeat += 1;
+      if (state.currentBeat > BEATS_PER_BAR) {
+        state.currentBeat = 1;
+        state.currentBar += 1;
+      }
+    }
+  }
+
+  // ---------- UI rendering ----------
+  function renderBar() {
+    $barCurrent.textContent = String(state.currentBar);
+  }
+
+  function renderBeat(beat, bar) {
+    // beat is 1..4; only render if the state still reflects the same bar
+    // (avoid stale updates after stop).
+    if (!state.isPlaying && bar !== MAX_BARS) return;
+    $barCurrent.textContent = String(bar);
+    $beats.forEach((el, idx) => {
+      el.classList.toggle('is-active', idx === beat - 1);
+    });
+  }
+
+  function clearBeatHighlights() {
+    $beats.forEach((el) => el.classList.remove('is-active'));
+  }
+
+  // ---------- Playback lifecycle ----------
+  function start() {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    state.isPlaying = true;
+    state.currentBar = 1;
+    state.currentBeat = 1;
+    nextNoteTime = ctx.currentTime + 0.05;
+
+    renderBar();
+    clearBeatHighlights();
+    $startStop.textContent = 'STOP';
+    $startStop.classList.add('is-playing');
+
+    schedulerInterval = setInterval(scheduler, LOOKAHEAD_MS);
+    scheduler();
+  }
+
+  function stop() {
+    if (schedulerInterval) {
+      clearInterval(schedulerInterval);
+      schedulerInterval = null;
+    }
+    state.isPlaying = false;
+    state.currentBar = 0;
+    state.currentBeat = 0;
+    renderBar();
+    clearBeatHighlights();
+    $startStop.textContent = 'START';
+    $startStop.classList.remove('is-playing');
+  }
+
+  function autoStop() {
+    // Like stop(), but leaves the bar counter at MAX_BARS so the drummer sees they finished.
+    if (schedulerInterval) {
+      clearInterval(schedulerInterval);
+      schedulerInterval = null;
+    }
+    state.isPlaying = false;
+    state.currentBeat = 0;
+    // Leave state.currentBar at MAX_BARS for visual feedback. start() resets it.
+    clearBeatHighlights();
+    $startStop.textContent = 'START';
+    $startStop.classList.remove('is-playing');
+  }
+
+  function toggle() {
+    if (state.isPlaying) stop();
+    else start();
+  }
+
+  // ---------- Controls ----------
+  $startStop.addEventListener('click', () => {
+    toggle();
+    $startStop.blur();
+  });
 })();
