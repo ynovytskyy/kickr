@@ -9,17 +9,21 @@
   </head>
   <body>
     <main class="app">
-      <section class="bar-counter" aria-label="Bar counter">
-        <span class="bar-counter__current" id="barCurrent">0</span>
-        <span class="bar-counter__total">/ 8</span>
-      </section>
+      <div class="play-zone" id="playZone" role="button" aria-label="Start or stop the metronome" tabindex="0">
+        <section class="beats" aria-label="Beat indicators">
+          <div class="beat beat--accent" data-beat="1"></div>
+          <div class="beat" data-beat="2"></div>
+          <div class="beat" data-beat="3"></div>
+          <div class="beat" data-beat="4"></div>
+        </section>
 
-      <section class="beats" aria-label="Beat indicators">
-        <div class="beat beat--accent" data-beat="1"></div>
-        <div class="beat" data-beat="2"></div>
-        <div class="beat" data-beat="3"></div>
-        <div class="beat" data-beat="4"></div>
-      </section>
+        <section class="bar-counter" aria-label="Bar counter">
+          <div class="bar-counter__inner">
+            <span class="bar-counter__current" id="barCurrent">0</span>
+            <span class="bar-counter__total">/ 8</span>
+          </div>
+        </section>
+      </div>
 
       <section class="bpm" aria-label="BPM selection">
         <button class="bpm__pill" type="button" data-bpm="80">80</button>
@@ -28,8 +32,6 @@
         <button class="bpm__pill" type="button" data-bpm="110">110</button>
         <button class="bpm__pill" type="button" data-bpm="120">120</button>
       </section>
-
-      <button class="start-stop" id="startStop" type="button" aria-label="Start or stop the metronome">START</button>
     </main>
 
     <script src="app.js"></script>

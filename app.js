@@ -19,8 +19,9 @@
   };
 
   // ---------- DOM ----------
+  const $app = document.querySelector('.app');
   const $barCurrent = document.getElementById('barCurrent');
-  const $startStop = document.getElementById('startStop');
+  const $playZone = document.getElementById('playZone');
   const $beats = Array.from(document.querySelectorAll('.beat'));
   const $bpmPills = Array.from(document.querySelectorAll('.bpm__pill'));
 
@@ -184,8 +185,7 @@
 
     renderBar();
     clearBeatHighlights();
-    $startStop.textContent = 'STOP';
-    $startStop.classList.add('is-playing');
+    $playZone.classList.add('is-playing');
 
     schedulerInterval = setInterval(scheduler, LOOKAHEAD_MS);
     scheduler();
@@ -203,8 +203,7 @@
     state.currentBeat = 0;
     renderBar();
     clearBeatHighlights();
-    $startStop.textContent = 'START';
-    $startStop.classList.remove('is-playing');
+    $playZone.classList.remove('is-playing');
   }
 
   function autoStop() {
@@ -219,8 +218,7 @@
     state.currentBeat = 0;
     // Leave state.currentBar at MAX_BARS for visual feedback. start() resets it.
     clearBeatHighlights();
-    $startStop.textContent = 'START';
-    $startStop.classList.remove('is-playing');
+    $playZone.classList.remove('is-playing');
   }
 
   function toggle() {
@@ -229,16 +227,15 @@
   }
 
   // ---------- Controls ----------
-  $startStop.addEventListener('click', () => {
+  $playZone.addEventListener('click', () => {
     toggle();
-    $startStop.blur();
+    $playZone.blur();
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.code !== 'Space' && event.key !== ' ') return;
-    // Ignore if a button has focus — the browser would already activate it on space,
-    // and we don't want a double-trigger. blur() in click handlers above guards against this,
-    // but this is belt-and-braces.
+    // Don't double-trigger when a BPM pill has focus — the browser will activate
+    // it on space, and we don't want toggle() running on top of that.
     const tag = (event.target && event.target.tagName) || '';
     if (tag === 'BUTTON') return;
     event.preventDefault();
@@ -247,7 +244,7 @@
 
   // ---------- Initial feature check ----------
   if (!(window.AudioContext || window.webkitAudioContext)) {
-    $startStop.textContent = 'AUDIO UNAVAILABLE';
-    $startStop.disabled = true;
+    $app.classList.add('is-audio-unavailable');
+    $barCurrent.textContent = 'NO AUDIO';
   }
 })();

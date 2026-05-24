@@ -4,6 +4,7 @@
   --muted: #555555;
   --accent: #ff8c1a;
   --surface: #161616;
+  --surface-playing: #1c150b;
   --beat-dim: #2a2a2a;
   --border: #2a2a2a;
 }
@@ -27,53 +28,62 @@ html, body {
   height: 100vh;
   height: 100dvh;
   display: flex;
-  flex-direction: column;
-  padding: 16px;
-  padding-top: max(16px, env(safe-area-inset-top));
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  gap: 16px;
-}
-
-.bar-counter {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
+  flex-direction: row;
+  padding: 12px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
   gap: 12px;
-  padding-top: 8px;
 }
 
-.bar-counter__current {
-  font-size: clamp(120px, 28vh, 280px);
-  font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+/* ---------- Play zone (left + center, tappable) ---------- */
+
+.play-zone {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 16px 24px;
+  cursor: pointer;
+  outline: none;
+  transition: background 120ms linear;
 }
 
-.bar-counter__total {
-  font-size: clamp(28px, 6vh, 56px);
-  color: var(--muted);
-  font-weight: 500;
+.play-zone:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
 }
+
+.play-zone.is-playing {
+  background: var(--surface-playing);
+}
+
+/* ---------- Beat column (left) ---------- */
 
 .beats {
+  flex: 0 0 auto;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-around;
   align-items: center;
-  gap: 20px;
+  width: 64px;
   padding: 8px 0;
 }
 
 .beat {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--beat-dim);
-  transition: background 60ms linear;
+  transition: background 60ms linear, transform 60ms linear;
 }
 
 .beat--accent {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   outline: 2px solid var(--muted);
   outline-offset: 4px;
 }
@@ -86,19 +96,65 @@ html, body {
   background: var(--accent);
 }
 
-.bpm {
+/* ---------- Bar counter (center, dominant) ---------- */
+
+.bar-counter {
+  flex: 1 1 auto;
   display: flex;
+  align-items: center;
   justify-content: center;
+  min-width: 0;
+}
+
+.bar-counter__inner {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.bar-counter__current {
+  font-size: clamp(180px, 80vh, 560px);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-counter__total {
+  font-size: clamp(36px, 12vh, 96px);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ---------- BPM column (right, scrollable) ---------- */
+
+.bpm {
+  flex: 0 0 auto;
+  width: clamp(96px, 14vw, 140px);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.bpm::-webkit-scrollbar { width: 6px; }
+.bpm::-webkit-scrollbar-track { background: transparent; }
+.bpm::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
 }
 
 .bpm__pill {
-  flex: 1 1 0;
+  flex: 0 0 auto;
+  width: 100%;
   min-height: 60px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--fg);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   border-radius: 999px;
   cursor: pointer;
@@ -111,25 +167,32 @@ html, body {
   border-color: var(--accent);
 }
 
-.start-stop {
-  flex: 1 1 auto;
-  border: none;
-  background: var(--surface);
-  color: var(--fg);
-  font-size: clamp(36px, 7vh, 64px);
-  font-weight: 700;
-  letter-spacing: 4px;
-  border-radius: 16px;
-  cursor: pointer;
-  font-family: inherit;
-}
+/* ---------- Audio-unavailable fallback ---------- */
 
-.start-stop.is-playing {
-  background: var(--accent);
-  color: #0a0a0a;
-}
-
-.start-stop:disabled {
-  opacity: 0.6;
+.app.is-audio-unavailable .play-zone {
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.app.is-audio-unavailable .bar-counter__total {
+  display: none;
+}
+
+.app.is-audio-unavailable .bar-counter__current {
+  font-size: clamp(48px, 14vh, 120px);
+  letter-spacing: 2px;
+}
+
+/* ---------- Portrait fallback (landscape is primary) ---------- */
+
+@media (orientation: portrait) {
+  .bar-counter__current {
+    font-size: clamp(140px, 40vh, 320px);
+  }
+  .bar-counter__total {
+    font-size: clamp(28px, 8vh, 64px);
+  }
+  .beats { width: 56px; }
+  .beat { width: 32px; height: 32px; }
+  .beat--accent { width: 44px; height: 44px; }
 }
