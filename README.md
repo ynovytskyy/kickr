@@ -1,6 +1,6 @@
-# Kikr — the missing drummer's metronome, built before practice
+# Kickr — the missing drummer's metronome
 
-*An experiment in how much value agentic development can deliver in a fixed time budget. Roughly a 5-minute read.*
+*An experiment in whether agentic development can deliver real quality — not just working code.*
 
 ## The setup
 
@@ -8,9 +8,24 @@ A free morning. The plan was drumming practice.
 
 Existing metronome apps miss what actually matters to a drummer — counting bars, holding form, training the feel of a musical phrase. They tick. That's all they do. There's a real gap on the market for a drummer's metronome.
 
-So I made a bet with myself: before practicing this morning, build the tool I've been wanting. Use Claude Code end-to-end. The experiment isn't "can AI write code." It's what agentic dev can give me back when I give it one morning.
+- **Time budget:** 30 minutes
+- **Domain:** well-known and simple (a metronome)
+- **Tools:** Claude Code CLI in terminal, Opus 4.7
+- **Plugins:** [superpowers](https://github.com/obra/superpowers)
+- **Repo state:** empty folder, greenfield — no pre-existing CLAUDE.md, no custom system prompts
 
-Spoiler for the impatient reader: an hour to a tool I'll open at every practice that follows.
+**TL;DR:**
+
+- Expected less time. Took about an hour — roughly 2× the expectation.
+- AI made obvious misses based on generic knowledge — e.g., applying the landscape redesign without checking that portrait still worked. Fixed only once the human in the loop looked at the result.
+- AI also made some genuinely good suggestions along the way — screen wake lock was Claude's idea during brainstorming, not mine.
+- Solid usable result after an hour. A tool I'll open at every practice that follows.
+
+![Kickr v1, landscape on a phone](docs/kickr-v1.jpg)
+
+*Try it live: [ynovytskyy.github.io/kickr](https://ynovytskyy.github.io/kickr/)*
+
+*Repo: [github.com/ynovytskyy/kickr](https://github.com/ynovytskyy/kickr)*
 
 ## Phase 1 — PRD, plan, agents
 
@@ -101,7 +116,7 @@ Result: louder samples, a stick-click count-in toggleable between one and two ba
 
 ## What the experiment actually says
 
-One morning in. A tool I'll open at every drumming practice. The bet paid.
+One morning in. A tool I'll open at every drumming practice. The experiment paid.
 
 The engineer/PM takeaway isn't "AI builds apps now." It's narrower and more useful:
 
@@ -110,5 +125,3 @@ The engineer/PM takeaway isn't "AI builds apps now." It's narrower and more usef
 - **But reviewer findings are input to judgment, not commands.** Modern agentic setups have evolved past single-pass review pipelines. One reviewer flagged the wake-lock code as having "unhandled promise rejections" — a serious-sounding finding. The orchestrator read the actual code, noticed both functions wrapped their `await` calls in `try/catch`, and pushed back. The change wasn't applied. The system is iterative and self-correcting in ways a linear pipeline isn't.
 - **It's weak at the calls that need domain experience.** It can't tell you that drummers prop phones landscape on the kit, or that "intricate beats" means a 2× subdivision tick. It will produce a usable artifact and miss the right one.
 - **The value comes from iterating with someone who knows the domain.** The five-iteration loop isn't overhead. It's the work.
-
-Repo: [github.com/ynovytskyy/kickr](https://github.com/ynovytskyy/kickr). Three files. No build step. No dependencies.
