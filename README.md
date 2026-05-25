@@ -45,13 +45,17 @@ Distinctive features:
 
 Claude Code didn't start coding. It invoked a brainstorming skill, asked three clarifying questions (auto-stop behavior, which presets to ship, screen wake lock), and wrote a short spec. I replied *"init git and proceed with implementation plan."* It produced a six-task plan and dispatched a team of subagents — one implementer per task, plus a spec-compliance reviewer and a code-quality reviewer behind each.
 
-![Phase 1 wrapping up](docs/metronome-session-phase1.jpg)
+<p align="center">
+  <img src="docs/metronome-session-phase1.jpg" alt="Phase 1 wrapping up">
+  <br>
+  <sub><em>25 minutes of session time, six tasks done, final review running.</em></sub>
+</p>
 
-*25 minutes of session time, six tasks done, final review running.*
-
-![Claude's v0.1](docs/metronome-v0.1.jpg)
-
-*What Phase 1 produced.*
+<p align="center">
+  <img src="docs/metronome-v0.1.jpg" alt="Claude's v0.1">
+  <br>
+  <sub><em>What Phase 1 produced.</em></sub>
+</p>
 
 **Takeaway from Phase 1.** I had a working app. I also had design choices an experienced practitioner wouldn't have made: a separate START button eating space, BPM pills in a row wasting horizontal real estate, no thought to landscape as the primary orientation a drummer would actually use on a kit. The agentic build made decent local decisions and missed the category-level call a domain practitioner would have made. That gap is the reason Phase 2 exists.
 
@@ -89,9 +93,11 @@ Look at @~/Downloads/metronome-v0.2.jpg to see the problem.
 The way I suggest to fix it is conceptually similar to how we designed the landscape mode but in the portrait mode we want to gain space by showing it in three rows rather than three columns in landscape mode. So the top row would show the beat indicator in a horizontal way and the bottom-most row will be showing the BPM selectors but in this case scrollable horizontally.
 ```
 
-![The portrait bug](docs/metronome-v0.2.jpg)
-
-*What I sent Claude — landscape worked, portrait was clipped.*
+<p align="center">
+  <img src="docs/metronome-v0.2.jpg" alt="The portrait bug">
+  <br>
+  <sub><em>What I sent Claude — landscape worked, portrait was clipped.</em></sub>
+</p>
 
 Result: 3-row portrait layout, BPM strip scrollable horizontally.
 
